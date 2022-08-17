@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync/atomic"
 	"time"
 
 	"bazil.org/fuse"
@@ -29,6 +28,7 @@ func (f *File) Attr(ctx context.Context, a *fuse.Attr) error {
 }
 
 func (f *File) ReadAll(ctx context.Context) ([]byte, error) {
+	fmt.Println("here")
 	fmt.Println(f.Content)
 	return f.Content, nil
 }
@@ -38,12 +38,11 @@ func (f *File) GetDirentType() fuse.DirentType {
 }
 
 func NewFile(content []byte) *File {
-	atomic.AddUint64(&inodeCnt, 1)
 	return &File{
 		Type:    fuse.DT_File,
 		Content: content,
 		Attributes: fuse.Attr{
-			Inode: inodeCnt,
+			Inode: 0,
 			Atime: time.Now(),
 			Mtime: time.Now(),
 			Ctime: time.Now(),

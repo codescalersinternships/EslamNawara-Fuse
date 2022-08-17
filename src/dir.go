@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"os"
-	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -24,6 +23,20 @@ type Dir struct {
 	Type       fuse.DirentType
 	Attributes fuse.Attr
 	Entries    map[string]interface{}
+}
+
+func NewDir() *Dir {
+	return &Dir{
+		Type: fuse.DT_Dir,
+		Attributes: fuse.Attr{
+			Inode: 0,
+			Atime: time.Now(),
+			Mtime: time.Now(),
+			Ctime: time.Now(),
+			Mode:  os.ModeDir | 0o777,
+		},
+		Entries: map[string]interface{}{},
+	}
 }
 
 func (d *Dir) Attr(ctx context.Context, a *fuse.Attr) error {
@@ -56,20 +69,6 @@ func (d *Dir) ReadDirAll(ctx context.Context) ([]fuse.Dirent, error) {
 		})
 	}
 	return entries, nil
-}
-func NewDir() *Dir {
-	atomic.AddUint64(&inodeCnt, 1)
-	return &Dir{
-		Type: fuse.DT_Dir,
-		Attributes: fuse.Attr{
-			Inode: inodeCnt,
-			Atime: time.Now(),
-			Mtime: time.Now(),
-			Ctime: time.Now(),
-			Mode:  os.ModeDir | 0o777,
-		},
-		Entries: map[string]interface{}{},
-	}
 }
 
 func (d *Dir) Mkdir(ctx context.Context, req *fuse.MkdirRequest) (fs.Node, error) {

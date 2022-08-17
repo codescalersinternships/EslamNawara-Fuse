@@ -10,3 +10,4 @@ type Fuse struct {
 	Age  int       `fuse:"Age"`
 	Sub  SubStruct `fuse:"Sub"`
 }
+

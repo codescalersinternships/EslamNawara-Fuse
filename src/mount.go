@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"reflect"
-	"strconv"
 
 	"bazil.org/fuse"
 	"bazil.org/fuse/fs"
@@ -12,16 +12,12 @@ import (
 )
 
 var (
-	inodeCnt   uint64
-	Attributes fuse.Attr
-	dataMp     map[string]interface{}
+	dataMp map[string]interface{}
 )
 
 const errNotPermitted = "Operation not permitted"
 
-type FS struct {
-	node fs.Node
-}
+type FS struct{}
 
 type EntryGetter interface {
 	GetDirentType() fuse.DirentType
@@ -38,8 +34,6 @@ func Mount(filePath, mountPoint string) error {
 	con, err := fuse.Mount(mountPoint, fuse.FSName("structFuse"), fuse.Subtype("tmpfs"))
 	CheckErr(err)
 	defer con.Close()
-
-	inodeCnt = 2
 
 	dataMp = structs.Map(data[0])
 
@@ -64,13 +58,7 @@ func createEntries(structMap interface{}) map[string]interface{} {
 			dir.Entries = createEntries(val)
 			entries[key] = dir
 		} else {
-			var value string
-			if reflect.TypeOf(val).Kind() == reflect.Int {
-				value = strconv.Itoa(val.(int))
-			} else {
-				value = val.(string)
-			}
-			entries[key] = NewFile([]byte(value))
+			entries[key] = NewFile([]byte(fmt.Sprint(reflect.ValueOf(val))))
 		}
 	}
 	return entries
