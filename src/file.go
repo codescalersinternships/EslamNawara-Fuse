@@ -28,8 +28,7 @@ func (f *File) Attr(ctx context.Context, a *fuse.Attr) error {
 }
 
 func (f *File) ReadAll(ctx context.Context) ([]byte, error) {
-	fmt.Println("here")
-	fmt.Println(f.Content)
+	fmt.Println("Reading a file")
 	return f.Content, nil
 }
 

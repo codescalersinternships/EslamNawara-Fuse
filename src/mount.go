@@ -25,6 +25,7 @@ type EntryGetter interface {
 
 func Mount(filePath, mountPoint string) error {
 	var data []Fuse
+
 	fileContent, err := os.ReadFile(filePath)
 	CheckErr(err)
 
@@ -63,3 +64,4 @@ func createEntries(structMap interface{}) map[string]interface{} {
 	}
 	return entries
 }
+
