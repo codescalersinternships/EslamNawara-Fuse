@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"os"
 	"syscall"
 	"time"
@@ -17,6 +16,7 @@ type Dir struct {
 	Entries    map[string]any
 }
 
+// Create new empty directory
 func NewDir() *Dir {
 	return &Dir{
 		Type: fuse.DT_Dir,
@@ -31,11 +31,14 @@ func NewDir() *Dir {
 	}
 }
 
+// Provides the core information for a directory
 func (d *Dir) Attr(ctx context.Context, a *fuse.Attr) error {
 	*a = d.Attributes
 	return nil
 }
 
+// Provides the Node that matches that name, otherwise, return fuse.ENOENT.
+// It could be either a File or a sub-Dir
 func (d *Dir) Lookup(ctx context.Context, name string) (fs.Node, error) {
 	node, ok := d.Entries[name]
 	if ok {
@@ -48,6 +51,7 @@ func (d *Dir) GetDirentType() fuse.DirentType {
 	return d.Type
 }
 
+// Returns the content of a directory
 func (d *Dir) ReadDirAll(ctx context.Context) ([]fuse.Dirent, error) {
 	var entries []fuse.Dirent
 
@@ -61,20 +65,4 @@ func (d *Dir) ReadDirAll(ctx context.Context) ([]fuse.Dirent, error) {
 		})
 	}
 	return entries, nil
-}
-
-func (d *Dir) Mkdir(ctx context.Context, req *fuse.MkdirRequest) (fs.Node, error) {
-	return nil, errors.New(errNotPermitted)
-}
-
-func (d *Dir) Create(ctx context.Context, req *fuse.CreateRequest, resp *fuse.CreateResponse) (fs.Node, fs.Handle, error) {
-	return nil, nil, errors.New(errNotPermitted)
-}
-
-func (d *Dir) Setattr(ctx context.Context, req *fuse.SetattrRequest, resp *fuse.SetattrResponse) error {
-	return errors.New(errNotPermitted)
-}
-
-func (d *Dir) Remove(ctx context.Context, req *fuse.RemoveRequest) error {
-	return errors.New(errNotPermitted)
 }
