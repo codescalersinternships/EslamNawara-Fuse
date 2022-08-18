@@ -3,18 +3,10 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"bazil.org/fuse"
-	"bazil.org/fuse/fs"
 )
-
-var _ = (fs.Node)((*File)(nil))
-var _ = (fs.HandleWriter)((*File)(nil))
-var _ = (fs.HandleReadAller)((*File)(nil))
-var _ = (fs.NodeSetattrer)((*File)(nil))
-var _ = (EntryGetter)((*File)(nil))
 
 type File struct {
 	Type       fuse.DirentType
@@ -28,8 +20,7 @@ func (f *File) Attr(ctx context.Context, a *fuse.Attr) error {
 }
 
 func (f *File) ReadAll(ctx context.Context) ([]byte, error) {
-	fmt.Println("Reading a file")
-	return f.Content, nil
+	return append([]byte(f.Content), []byte("\n")...), nil
 }
 
 func (f *File) GetDirentType() fuse.DirentType {
@@ -45,6 +36,7 @@ func NewFile(content []byte) *File {
 			Atime: time.Now(),
 			Mtime: time.Now(),
 			Ctime: time.Now(),
+			Size:  uint64(len(content) + 1),
 			Mode:  0o444,
 		},
 	}

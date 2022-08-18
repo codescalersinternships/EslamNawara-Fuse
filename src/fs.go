@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"bazil.org/fuse"
 	"bazil.org/fuse/fs"
@@ -12,27 +13,32 @@ import (
 const errNotPermitted = "Operation not permitted"
 
 type FS struct {
-	dataMp map[string]interface{}
+	dataMp map[string]any
 }
 
 type EntryGetter interface {
 	GetDirentType() fuse.DirentType
 }
 
-func Mount(data Fuse, mountPoint string) error {
+func Mount(data []Fuse, mountPoint string) error {
 	con, err := fuse.Mount(mountPoint)
-	CheckErr(err)
+	if err != nil {
+		return err
+	}
+
 	defer con.Close()
 
 	err = fs.Serve(con, NewFS(data))
-	CheckErr(err)
+	if err != nil {
+		return err
+	}
 
 	return nil
 
 }
-func NewFS(data Fuse) *FS {
+func NewFS(data []Fuse) *FS {
 	return &FS{
-		dataMp: structs.Map(data),
+		dataMp: createDataMap(data),
 	}
 }
 
@@ -42,9 +48,9 @@ func (fs *FS) Root() (fs.Node, error) {
 	return dir, nil
 }
 
-func createEntries(structMap interface{}) map[string]interface{} {
-	entries := map[string]interface{}{}
-	for key, val := range structMap.(map[string]interface{}) {
+func createEntries(structMap any) map[string]any {
+	entries := map[string]any{}
+	for key, val := range structMap.(map[string]any) {
 		if reflect.TypeOf(val).Kind() == reflect.Map {
 			dir := NewDir()
 			dir.Entries = createEntries(val)
@@ -54,4 +60,12 @@ func createEntries(structMap interface{}) map[string]interface{} {
 		}
 	}
 	return entries
+}
+
+func createDataMap(data []Fuse) map[string]any {
+	dataMap := make(map[string]any)
+	for i, elem := range data {
+		dataMap[strconv.Itoa(i)] = structs.Map(elem)
+	}
+	return dataMap
 }

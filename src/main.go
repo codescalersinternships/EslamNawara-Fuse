@@ -12,26 +12,25 @@ func main() {
 		return
 	}
 	mountPoint := os.Args[1]
-
-	data := Fuse{
+	var data []Fuse
+	data = append(data, Fuse{
 		Name: "Eslam",
 		Age:  22,
 		Sub: SubStruct{
 			SomeValue:      20,
 			SomeOtherValue: "some data",
 		},
-	}
+	})
 
 	err = os.MkdirAll(mountPoint, 0777)
-	CheckErr(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	err = Mount(data, mountPoint)
-	CheckErr(err)
-}
-
-func CheckErr(err error) error {
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return
 	}
-	return nil
 }
