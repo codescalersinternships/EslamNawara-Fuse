@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"reflect"
 
 	"bazil.org/fuse"
@@ -11,43 +9,36 @@ import (
 	"github.com/fatih/structs"
 )
 
-var (
-	dataMp map[string]interface{}
-)
-
 const errNotPermitted = "Operation not permitted"
 
-type FS struct{}
+type FS struct {
+	dataMp map[string]interface{}
+}
 
 type EntryGetter interface {
 	GetDirentType() fuse.DirentType
 }
 
-func Mount(filePath, mountPoint string) error {
-	var data []Fuse
-
-	fileContent, err := os.ReadFile(filePath)
-	CheckErr(err)
-
-	err = json.Unmarshal(fileContent, &data)
-	CheckErr(err)
-
-	con, err := fuse.Mount(mountPoint, fuse.FSName("structFuse"), fuse.Subtype("tmpfs"))
+func Mount(data Fuse, mountPoint string) error {
+	con, err := fuse.Mount(mountPoint)
 	CheckErr(err)
 	defer con.Close()
 
-	dataMp = structs.Map(data[0])
-
-	err = fs.Serve(con, FS{})
+	err = fs.Serve(con, NewFS(data))
 	CheckErr(err)
 
 	return nil
 
 }
+func NewFS(data Fuse) *FS {
+	return &FS{
+		dataMp: structs.Map(data),
+	}
+}
 
-func (FS) Root() (fs.Node, error) {
+func (fs *FS) Root() (fs.Node, error) {
 	dir := NewDir()
-	dir.Entries = createEntries(dataMp)
+	dir.Entries = createEntries(fs.dataMp)
 	return dir, nil
 }
 
@@ -64,4 +55,3 @@ func createEntries(structMap interface{}) map[string]interface{} {
 	}
 	return entries
 }
-

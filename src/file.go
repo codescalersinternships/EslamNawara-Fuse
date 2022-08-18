@@ -45,7 +45,7 @@ func NewFile(content []byte) *File {
 			Atime: time.Now(),
 			Mtime: time.Now(),
 			Ctime: time.Now(),
-			Mode:  0o777,
+			Mode:  0o444,
 		},
 	}
 }
