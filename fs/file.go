@@ -1,4 +1,4 @@
-package main
+package fs
 
 import (
 	"context"
@@ -14,13 +14,13 @@ type File struct {
 	Type       fuse.DirentType
 	Content    []byte
 	Path       []string
-	Struct     *Fuse
+	Struct     any
 	Name       string
 	Attributes fuse.Attr
 }
 
 // Create new empty file
-func NewFile(content []byte, path []string, str *Fuse, name string) *File {
+func NewFile(content []byte, path []string, str any, name string) *File {
 	return &File{
 		Type:    fuse.DT_File,
 		Content: content,

@@ -1,4 +1,4 @@
-module fuse
+module EslamNawara-Fuse
 
 go 1.19
 
