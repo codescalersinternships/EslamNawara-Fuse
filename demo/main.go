@@ -43,7 +43,7 @@ func main() {
 
 	go func() {
 		time.Sleep(2 * time.Second)
-		data.Name = "not eslam"
+		data.Name = "not Eslam"
 	}()
 
 	err = fs.Mount(data, mountPoint)
