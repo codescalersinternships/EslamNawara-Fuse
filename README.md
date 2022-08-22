@@ -21,55 +21,51 @@ import (
 	"os"
 	"time"
 
-	"fuse/src"
+	"EslamNawara-Fuse/fs"
 )
 
-//change these structs as you wish to represent your file system
-type structure struct {
-	String       string
-	Int          int
-	Bool         bool
-	SubStructure subStructure
+type SubStruct struct {
+	SomeValue      int
+	SomeOtherValue string
 }
 
-type subStructure struct {
-	Float float32
-}
-
-func Routine(input *structure) {
-	time.Sleep(time.Second * 5)
-	input.String = "new string"
+type Fuse struct {
+	Name string
+	Age  int
+	Sub  SubStruct
 }
 
 func main() {
 	var err error
 	if len(os.Args) != 2 {
-		fmt.Println("too few arguments")
-		fmt.Println(len(os.Args))
-		os.Exit(1)
+		fmt.Println("Mounting point not specified")
+		return
 	}
 	mountPoint := os.Args[1]
-	// fill the struct as you wish with data to be represented in the files
-	input := &structure{
-		String: "str",
-		Int:    18,
-		Bool:   true,
-		SubStructure: subStructure{
-			Float: 1.3,
+	data := &Fuse{
+		Name: "Eslam",
+		Age:  22,
+		Sub: SubStruct{
+			SomeValue:      20,
+			SomeOtherValue: "some data",
 		},
 	}
 
 	err = os.MkdirAll(mountPoint, 0777)
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		fmt.Println(err)
+		return
 	}
 
-	go Routine(input)
-	err = fs.Mount(mountPoint, input)
+	go func() {
+		time.Sleep(2 * time.Second)
+		data.Name = "not Eslam"
+	}()
+
+	err = fs.Mount(data, mountPoint)
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		fmt.Println(err)
+		return
 	}
 }
 ```
